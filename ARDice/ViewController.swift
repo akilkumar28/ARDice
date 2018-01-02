@@ -23,11 +23,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+//        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
+        let sphere = SCNSphere(radius: 0.2)
         
-        // Set the scene to the view
-        sceneView.scene = scene
+        
+        
+        let material = SCNMaterial()
+        material.diffuse.contents = UIImage(named: "art.scnassets/moon.jpg")
+        
+        sphere.materials = [material]
+        
+        let node = SCNNode()
+        node.position = SCNVector3(0, 0.1, -0.5)
+        node.geometry = sphere
+        
+        sceneView.scene.rootNode.addChildNode(node)
+        sceneView.automaticallyUpdatesLighting = true
+        sceneView.autoenablesDefaultLighting = true
+        
+        
+//        // Create a new scene
+//        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+//
+//        // Set the scene to the view
+//        sceneView.scene = scene
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,10 +67,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Release any cached data, images, etc that aren't in use.
-    }
+    
 
     // MARK: - ARSCNViewDelegate
     
