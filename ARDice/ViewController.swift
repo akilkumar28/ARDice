@@ -11,8 +11,9 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
     @IBOutlet var sceneView: ARSCNView!
+    var diceArray = [SCNNode]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,24 +26,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
         
-//        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
-//        let sphere = SCNSphere(radius: 0.2)
-//        let material = SCNMaterial()
-//        material.diffuse.contents = UIImage(named: "art.scnassets/moon.jpg")
-//
-//        sphere.materials = [material]
-//
-//        let node = SCNNode()
-//        node.position = SCNVector3(0, 0.1, -0.5)
-//        node.geometry = sphere
-//
-//        sceneView.scene.rootNode.addChildNode(node)
-//        sceneView.automaticallyUpdatesLighting = true
-//        sceneView.autoenablesDefaultLighting = true
+        //        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
+        //        let sphere = SCNSphere(radius: 0.2)
+        //        let material = SCNMaterial()
+        //        material.diffuse.contents = UIImage(named: "art.scnassets/moon.jpg")
+        //
+        //        sphere.materials = [material]
+        //
+        //        let node = SCNNode()
+        //        node.position = SCNVector3(0, 0.1, -0.5)
+        //        node.geometry = sphere
+        //
+        //        sceneView.scene.rootNode.addChildNode(node)
+        //        sceneView.automaticallyUpdatesLighting = true
+        //        sceneView.autoenablesDefaultLighting = true
         
         
-
-
+        
+        
         // Set the scene to the view
         sceneView.automaticallyUpdatesLighting = true
         sceneView.autoenablesDefaultLighting = true
@@ -56,7 +57,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
-
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -77,13 +78,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 // Create a new scene
                 let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
                 if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
-                diceNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius, hitResult.worldTransform.columns.3.z)
-                sceneView.scene.rootNode.addChildNode(diceNode)
+                    diceNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius, hitResult.worldTransform.columns.3.z)
+                    sceneView.scene.rootNode.addChildNode(diceNode)
+                    diceArray.append(diceNode)
+                    doRoll(dice: diceNode)
                     
-                    let randomx = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
-                    let randomz = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
-                    diceNode.runAction(SCNAction.rotateBy(x: CGFloat(randomx * 5), y: 0, z: CGFloat(randomz * 5), duration: 0.5))
-        
                 }
                 
             }else{
@@ -92,8 +91,37 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
+    func rollAll(){
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                doRoll(dice:dice)
+            }
+        }
+    }
     
-
+    func doRoll(dice:SCNNode) {
+        let randomx = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+        let randomz = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+        dice.runAction(SCNAction.rotateBy(x: CGFloat(randomx * 5), y: 0, z: CGFloat(randomz * 5), duration: 0.5))
+    }
+    
+    
+    @IBAction func thrashBtnPrsd(_ sender: UIBarButtonItem) {
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                dice.removeFromParentNode()
+            }
+        }
+    }
+    
+    @IBAction func rollBtnPrssd(_ sender: UIBarButtonItem) {
+        rollAll()
+    }
+    
+    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+        rollAll()
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor {
             let planeAnchor = anchor as! ARPlaneAnchor
@@ -112,7 +140,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
     }
-
+    
     
     
 }
